@@ -37,7 +37,7 @@ router.get('/generate/:trackId', requireAdmin, (req, res) => {
   doc.fontSize(22).font('Helvetica-Bold').text('Ladlee Sarees', 50, 50);
   doc.fontSize(9).font('Helvetica').fillColor('#666')
     .text('Premium Saree Collection', 50, 75)
-    .text('Phone: +91 98765 43210 | Email: shahdevansh3807@gmail.com', 50, 88);
+    .text('Phone: +91 9429670205 / 7990309748 | Email: shahdevansh3807@gmail.com', 50, 88);
 
   // Invoice title
   doc.fillColor('#1A1A1A').fontSize(14).font('Helvetica-Bold')
@@ -157,7 +157,7 @@ router.post('/manual', requireAdmin, (req, res) => {
   doc.fontSize(22).font('Helvetica-Bold').text('Ladlee Sarees', 50, 50);
   doc.fontSize(9).font('Helvetica').fillColor('#666')
     .text('Premium Saree Collection', 50, 75)
-    .text('Phone: +91 98765 43210 | Email: shahdevansh3807@gmail.com', 50, 88);
+    .text('Phone: +91 9429670205 / 7990309748 | Email: shahdevansh3807@gmail.com', 50, 88);
 
   doc.fillColor('#1A1A1A').fontSize(14).font('Helvetica-Bold')
     .text('BILL / RECEIPT', 400, 50, { align: 'right' });

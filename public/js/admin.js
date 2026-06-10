@@ -578,6 +578,27 @@ async function deleteCategory(id, name) {
   }
 }
 
+// ===== CHANGE USERNAME =====
+async function changeUsername(e) {
+  e.preventDefault();
+  const result = await api('/api/admin/change-username', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      password: document.getElementById('usernamePass').value,
+      newUsername: document.getElementById('newUsername').value
+    })
+  });
+
+  if (result.success) {
+    showToast(result.message, 'success');
+    document.getElementById('usernamePass').value = '';
+    document.getElementById('newUsername').value = '';
+  } else {
+    showToast(result.error || 'Failed', 'error');
+  }
+}
+
 // ===== CHANGE PASSWORD =====
 async function changePassword(e) {
   e.preventDefault();
@@ -603,23 +624,30 @@ async function changePassword(e) {
 // ===== HERO MEDIA =====
 async function uploadHeroMedia(e) {
   e.preventDefault();
-  const file = document.getElementById('heroFile').files[0];
-  if (!file) { showToast('Select a file', 'error'); return; }
+  const files = document.getElementById('heroFiles').files;
+  if (!files || files.length === 0) { showToast('Select files', 'error'); return; }
 
   const formData = new FormData();
-  formData.append('heroFile', file);
+  for (let i = 0; i < files.length; i++) {
+    formData.append('heroFiles', files[i]);
+  }
 
   try {
     const res = await fetch('/api/admin/hero-media', { method: 'POST', body: formData });
     const result = await res.json();
     if (result.success) {
-      showToast('Hero media updated!', 'success');
-      document.getElementById('heroForm').reset();
+      showToast('Hero media updated! Refresh homepage to see.', 'success');
+      // Show preview
+      const preview = document.getElementById('heroPreview');
+      preview.innerHTML = result.files.map(f => {
+        if (f.type === 'video') return `<video src="${f.url}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;" muted></video>`;
+        return `<img src="${f.url}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;">`;
+      }).join('');
     } else {
       showToast(result.error || 'Upload failed', 'error');
     }
   } catch (err) {
-    showToast('Upload failed', 'error');
+    showToast('Upload failed. Check file size.', 'error');
   }
 }
 

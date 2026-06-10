@@ -344,11 +344,21 @@
       const loginId = document.getElementById('loginId').value.trim();
       const password = document.getElementById('loginPass').value;
 
-      // Detect if it's email or phone
+      // Check if it's admin credentials
+      const adminRes = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: loginId, password })
+      });
+      const adminData = await adminRes.json();
+      if (adminData.success) {
+        window.location.href = '/admin';
+        return;
+      }
+
+      // Otherwise try user login
       const isEmail = loginId.includes('@');
-      const body = isEmail
-        ? { email: loginId, password }
-        : { phone: loginId, password };
+      const body = isEmail ? { email: loginId, password } : { phone: loginId, password };
 
       const res = await fetch('/api/user/login', {
         method: 'POST',

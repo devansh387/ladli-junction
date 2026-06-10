@@ -80,6 +80,22 @@ router.post('/change-password', requireAdmin, (req, res) => {
   res.json({ success: true, message: 'Password changed successfully' });
 });
 
+// Change username
+router.post('/change-username', requireAdmin, (req, res) => {
+  const { password, newUsername } = req.body;
+  const admin = getOne('SELECT * FROM admin WHERE id = ?', [req.session.adminId]);
+
+  if (!bcrypt.compareSync(password, admin.password)) {
+    return res.status(400).json({ error: 'Password is incorrect' });
+  }
+  if (!newUsername || newUsername.trim().length < 3) {
+    return res.status(400).json({ error: 'Username must be at least 3 characters' });
+  }
+
+  exec('UPDATE admin SET username = ? WHERE id = ?', [newUsername.trim(), admin.id]);
+  res.json({ success: true, message: 'Username changed to ' + newUsername.trim() });
+});
+
 // Add product
 router.post('/products', requireAdmin, (req, res) => {
   upload.array('images', 25)(req, res, function(err) {

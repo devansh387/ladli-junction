@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadCategories();
   loadProducts();
   updateCartUI();
+  loadHeroMedia();
 
   // Mobile: require login to browse
   if (window.innerWidth <= 768) {
@@ -50,6 +51,24 @@ document.addEventListener('DOMContentLoaded', () => {
 async function api(url, options = {}) {
   const res = await fetch(url, options);
   return res.json();
+}
+
+// ===== LOAD HERO MEDIA =====
+async function loadHeroMedia() {
+  try {
+    const res = await fetch('/hero-config.json');
+    if (!res.ok) return;
+    const files = await res.json();
+    const container = document.getElementById('heroMediaContainer');
+    if (!files || files.length === 0) return;
+
+    container.innerHTML = files.map((f, i) => {
+      if (f.type === 'video') {
+        return `<video autoplay muted loop playsinline style="width:100%;max-width:380px;height:auto;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.12);"><source src="${f.url}" type="video/mp4"></video>`;
+      }
+      return `<div class="floating-card card-${i + 1}"><img src="${f.url}" alt=""></div>`;
+    }).join('');
+  } catch (e) {}
 }
 
 // ===== LOAD FEATURED =====
