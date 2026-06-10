@@ -1,0 +1,7 @@
+{
+  "files.exclude": {
+    "node_modules": true,
+    "uploads": true,
+    "database/shop.db": true
+  }
+}

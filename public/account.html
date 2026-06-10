@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account - Ladli Junction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/order.css">
+  <style>
+    .account-page { min-height: 100vh; padding: 100px 24px 60px; max-width: 900px; margin: 0 auto; }
+
+    /* Auth Forms */
+    .auth-container { max-width: 420px; margin: 0 auto; }
+    .auth-card { background: white; border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(93,15,51,0.1); }
+    .auth-card h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; text-align: center; color: var(--primary); margin-bottom: 8px; }
+    .auth-card .subtitle { text-align: center; color: var(--text-light); font-size: 0.9rem; margin-bottom: 28px; }
+    .auth-tabs { display: flex; margin-bottom: 28px; border-radius: 10px; overflow: hidden; border: 2px solid #eee; }
+    .auth-tab { flex: 1; padding: 12px; text-align: center; font-weight: 500; cursor: pointer; transition: all 0.3s; background: #f9f9f9; color: #666; font-size: 0.9rem; border: none; }
+    .auth-tab.active { background: var(--primary); color: white; }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--text); text-transform: uppercase; letter-spacing: 0.3px; }
+    .form-group input { width: 100%; padding: 12px 16px; border: 2px solid #eee; border-radius: 10px; font-size: 0.95rem; font-family: inherit; transition: border-color 0.3s; }
+    .form-group input:focus { outline: none; border-color: var(--primary); }
+    .auth-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 8px; }
+    .auth-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+    .auth-error { color: #C62828; font-size: 0.85rem; text-align: center; margin-top: 12px; display: none; }
+    .auth-error.show { display: block; }
+
+    /* Dashboard */
+    .dashboard { display: none; }
+    .dashboard.active { display: block; }
+    .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+    .dash-header h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text); }
+    .dash-header .user-badge { background: #EDE7F6; padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; color: var(--primary); font-weight: 500; }
+    .logout-link { background: none; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; color: #666; font-size: 0.85rem; cursor: pointer; transition: all 0.3s; }
+    .logout-link:hover { border-color: #C62828; color: #C62828; }
+
+    /* Dashboard Tabs */
+    .dash-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .dash-tab { padding: 10px 20px; background: white; border: 2px solid #eee; border-radius: 10px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.3s; color: #666; }
+    .dash-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .dash-section { display: none; }
+    .dash-section.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Profile Card */
+    .profile-card { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    .profile-card h3 { margin-bottom: 20px; font-size: 1.1rem; color: var(--text); }
+    .profile-card .save-btn { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; margin-top: 8px; }
+
+    /* Order Cards */
+    .order-list { display: flex; flex-direction: column; gap: 16px; }
+    .order-card-mini { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); transition: all 0.3s; }
+    .order-card-mini:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .order-mini-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .order-mini-header .track-code { font-weight: 700; color: var(--primary); font-size: 0.95rem; }
+    .order-mini-header .date { font-size: 0.8rem; color: #999; }
+    .status-pill { padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; text-transform: capitalize; }
+    .status-pill.confirmed { background: #E3F2FD; color: #1565C0; }
+    .status-pill.shipped { background: #F3E5F5; color: #7B1FA2; }
+    .status-pill.delivered { background: #E8F5E9; color: #2E7D32; }
+    .status-pill.cancelled { background: #FFEBEE; color: #C62828; }
+    .status-pill.pending { background: #FFF3E0; color: #E65100; }
+    .order-mini-items { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .order-mini-items img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; }
+    .order-mini-footer { display: flex; align-items: center; justify-content: space-between; }
+    .order-mini-footer .total { font-weight: 700; font-size: 1rem; color: var(--text); }
+    .order-mini-footer a { color: var(--primary); font-size: 0.85rem; font-weight: 500; text-decoration: none; }
+
+    .empty-box { text-align: center; padding: 48px 20px; color: var(--text-light); }
+    .empty-box i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; display: block; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar scrolled">
+    <div class="nav-container">
+      <a href="/" class="logo"><img src="/images/logo.png" alt="Ladli Junction" style="height:36px;"></a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#collection">Collection</a></li>
+        <li><a href="/account.html" style="color:var(--primary);font-weight:600;">My Account</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="/" style="text-decoration:none;color:var(--primary);font-size:0.9rem;font-weight:500;"><i class="fas fa-arrow-left"></i> Shop</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="account-page">
+    <!-- Auth Section (shown when not logged in) -->
+    <div id="authSection" class="auth-container">
+      <div class="auth-card">
+        <h2>🪷 Welcome</h2>
+        <p class="subtitle">Login or create an account to view your orders</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="showAuthTab('login')">Login</button>
+          <button class="auth-tab" onclick="showAuthTab('signup')">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Email or Phone</label>
+            <input type="text" id="loginId" required placeholder="Email or 10-digit phone">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPass" required placeholder="Your password" minlength="6">
+          </div>
+          <button type="submit" class="auth-btn"><i class="fas fa-sign-in-alt"></i> Login</button>
+          <p style="text-align:center;margin-top:12px;">
+            <a href="#" onclick="showAuthTab('forgot')" style="font-size:0.8rem;color:#666;text-decoration:none;">Forgot Password?</a>
+          </p>
+          <p class="auth-error" id="loginError"></p>
+        </form>
+
+        <!-- Forgot Password Form -->
+        <form id="forgotForm" class="auth-form" onsubmit="handleForgot(event)">
+          <p style="font-size:0.85rem;color:#666;margin-bottom:16px;text-align:center;">Enter your registered email to receive a reset OTP</p>
+          <div class="form-group">
+            <label>Email</label>
+            <div style="display:flex;gap:8px;">
+              <input type="email" id="forgotEmail" required placeholder="your@email.com" style="flex:1;">
+              <button type="button" onclick="sendResetOtp()" id="resetOtpBtn" style="padding:10px 14px;background:#1A1A1A;color:white;border:none;border-radius:8px;font-size:0.75rem;cursor:pointer;white-space:nowrap;">Send OTP</button>
+            </div>
+            <small id="resetOtpStatus" style="font-size:0.75rem;color:#666;margin-top:4px;display:block;"></small>
+          </div>
+          <div class="form-group" id="resetOtpGroup" style="display:none;">
+            <label>Enter OTP</label>
+            <input type="text" id="resetOtp" placeholder="6-digit OTP" maxlength="6" style="letter-spacing:4px;text-align:center;font-size:1.1rem;">
+          </div>
+          <div class="form-group" id="newPassGroup" style="display:none;">
+            <label>New Password</label>
+            <input type="password" id="resetNewPass" placeholder="Min 6 characters" minlength="6">
+          </div>
+          <button type="submit" class="auth-btn" id="resetBtn" style="display:none;"><i class="fas fa-lock"></i> Reset Password</button>
+          <p style="text-align:center;margin-top:12px;">
+            <a href="#" onclick="showAuthTab('login')" style="font-size:0.8rem;color:#666;text-decoration:none;">← Back to Login</a>
+          </p>
+          <p class="auth-error" id="forgotError"></p>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" class="auth-form" onsubmit="handleSignup(event)">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="signupName" required placeholder="Your full name">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <div style="display:flex;gap:8px;">
+              <input type="email" id="signupEmail" required placeholder="your@email.com" style="flex:1;">
+              <button type="button" onclick="sendOtp()" id="otpBtn" style="padding:10px 14px;background:var(--primary);color:white;border:none;border-radius:8px;font-size:0.8rem;cursor:pointer;white-space:nowrap;">Send OTP</button>
+            </div>
+            <small id="otpStatus" style="font-size:0.75rem;color:#666;margin-top:4px;display:block;"></small>
+          </div>
+          <div class="form-group" id="otpGroup" style="display:none;">
+            <label>Enter OTP</label>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="signupOtp" placeholder="6-digit OTP" maxlength="6" style="flex:1;letter-spacing:4px;text-align:center;font-size:1.1rem;">
+              <button type="button" onclick="verifyOtp()" id="verifyBtn" style="padding:10px 14px;background:#2E7D32;color:white;border:none;border-radius:8px;font-size:0.8rem;cursor:pointer;white-space:nowrap;">Verify</button>
+            </div>
+            <small id="otpVerifyStatus" style="font-size:0.75rem;color:#666;margin-top:4px;display:block;"></small>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="signupPhone" required placeholder="10-digit phone number" maxlength="13">
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" id="signupAddress" placeholder="Your delivery address">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signupPass" required placeholder="Min 6 characters" minlength="6">
+          </div>
+          <button type="submit" class="auth-btn" id="signupBtn" disabled style="opacity:0.5;cursor:not-allowed;"><i class="fas fa-user-plus"></i> Create Account</button>
+          <p style="font-size:0.75rem;color:#999;text-align:center;margin-top:8px;">Verify your email to enable signup</p>
+          <p class="auth-error" id="signupError"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Dashboard (shown when logged in) -->
+    <div id="dashSection" class="dashboard">
+      <div class="dash-header">
+        <div>
+          <h1 id="dashGreeting">Hello!</h1>
+          <span class="user-badge" id="dashPhone"></span>
+        </div>
+        <button class="logout-link" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+
+      <div class="dash-tabs">
+        <button class="dash-tab active" onclick="showDashTab('orders')"><i class="fas fa-box"></i> My Orders</button>
+        <button class="dash-tab" onclick="showDashTab('profile')"><i class="fas fa-user"></i> Profile</button>
+      </div>
+
+      <!-- Orders Tab -->
+      <div id="tab-orders" class="dash-section active">
+        <div class="order-list" id="userOrdersList"></div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div id="tab-profile" class="dash-section">
+        <div class="profile-card">
+          <h3><i class="fas fa-user-edit"></i> Edit Profile</h3>
+          <form onsubmit="updateProfile(event)">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="profileName">
+            </div>
+            <div class="form-group">
+              <label>Phone (cannot change)</label>
+              <input type="tel" id="profilePhone" disabled style="background:#f5f5f5;">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="profileEmail" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label>Default Address</label>
+              <input type="text" id="profileAddress" placeholder="Your delivery address">
+            </div>
+            <button type="submit" class="save-btn"><i class="fas fa-save"></i> Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => { checkLogin(); });
+
+    async function checkLogin() {
+      const res = await fetch('/api/user/me');
+      const data = await res.json();
+      if (data.loggedIn) {
+        currentUser = data.user;
+        showDashboard();
+      } else {
+        document.getElementById('authSection').style.display = 'block';
+        document.getElementById('dashSection').classList.remove('active');
+      }
+    }
+
+    function showAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      if (tab === 'login') {
+        document.querySelectorAll('.auth-tab')[0].classList.add('active');
+        document.getElementById('loginForm').classList.add('active');
+      } else if (tab === 'signup') {
+        document.querySelectorAll('.auth-tab')[1].classList.add('active');
+        document.getElementById('signupForm').classList.add('active');
+      } else if (tab === 'forgot') {
+        document.getElementById('forgotForm').classList.add('active');
+      }
+    }
+
+    async function sendResetOtp() {
+      const email = document.getElementById('forgotEmail').value.trim();
+      if (!email) { document.getElementById('resetOtpStatus').textContent = 'Enter email first'; document.getElementById('resetOtpStatus').style.color = '#C62828'; return; }
+
+      const btn = document.getElementById('resetOtpBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      document.getElementById('resetOtpStatus').textContent = '';
+
+      try {
+        const res = await fetch('/api/user/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById('resetOtpStatus').textContent = '✓ OTP sent! Check your inbox (valid for 5 minutes)';
+          document.getElementById('resetOtpStatus').style.color = '#2E7D32';
+          document.getElementById('resetOtpGroup').style.display = 'block';
+          document.getElementById('newPassGroup').style.display = 'block';
+          document.getElementById('resetBtn').style.display = 'block';
+          // Countdown
+          let sec = 60;
+          const timer = setInterval(() => {
+            sec--;
+            btn.textContent = `Resend (${sec}s)`;
+            if (sec <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = 'Resend OTP'; }
+          }, 1000);
+        } else {
+          document.getElementById('resetOtpStatus').textContent = data.error;
+          document.getElementById('resetOtpStatus').style.color = '#C62828';
+          btn.disabled = false;
+          btn.textContent = 'Send OTP';
+        }
+      } catch (err) {
+        document.getElementById('resetOtpStatus').textContent = 'Network error. Try again.';
+        document.getElementById('resetOtpStatus').style.color = '#C62828';
+        btn.disabled = false;
+        btn.textContent = 'Send OTP';
+      }
+    }
+
+    async function handleForgot(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('forgotError');
+      errEl.classList.remove('show');
+
+      const res = await fetch('/api/user/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('forgotEmail').value,
+          otp: document.getElementById('resetOtp').value,
+          newPassword: document.getElementById('resetNewPass').value
+        })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert('Password reset successful! Please login with your new password.');
+        showAuthTab('login');
+      } else {
+        errEl.textContent = data.error;
+        errEl.classList.add('show');
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('loginError');
+      errEl.classList.remove('show');
+
+      const loginId = document.getElementById('loginId').value.trim();
+      const password = document.getElementById('loginPass').value;
+
+      // Detect if it's email or phone
+      const isEmail = loginId.includes('@');
+      const body = isEmail
+        ? { email: loginId, password }
+        : { phone: loginId, password };
+
+      const res = await fetch('/api/user/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        currentUser = data.user;
+        showDashboard();
+      } else {
+        errEl.textContent = data.error;
+        errEl.classList.add('show');
+      }
+    }
+
+    let emailVerified = false;
+
+    async function sendOtp() {
+      const email = document.getElementById('signupEmail').value.trim();
+      if (!email) { document.getElementById('otpStatus').textContent = 'Enter email first'; document.getElementById('otpStatus').style.color = '#C62828'; return; }
+
+      const btn = document.getElementById('otpBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      document.getElementById('otpStatus').textContent = '';
+
+      const res = await fetch('/api/user/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('otpGroup').style.display = 'block';
+        document.getElementById('otpStatus').textContent = 'OTP sent! Check your inbox.';
+        document.getElementById('otpStatus').style.color = '#2E7D32';
+        // Cooldown
+        let sec = 60;
+        btn.textContent = sec + 's';
+        const timer = setInterval(() => {
+          sec--;
+          btn.textContent = sec + 's';
+          if (sec <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = 'Resend'; }
+        }, 1000);
+      } else {
+        document.getElementById('otpStatus').textContent = data.error;
+        document.getElementById('otpStatus').style.color = '#C62828';
+        btn.disabled = false;
+        btn.textContent = 'Send OTP';
+      }
+    }
+
+    async function verifyOtp() {
+      const email = document.getElementById('signupEmail').value.trim();
+      const otp = document.getElementById('signupOtp').value.trim();
+      if (!otp || otp.length !== 6) { document.getElementById('otpVerifyStatus').textContent = 'Enter 6-digit OTP'; document.getElementById('otpVerifyStatus').style.color = '#C62828'; return; }
+
+      const res = await fetch('/api/user/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        emailVerified = true;
+        document.getElementById('otpVerifyStatus').textContent = '✓ Email verified!';
+        document.getElementById('otpVerifyStatus').style.color = '#2E7D32';
+        document.getElementById('signupBtn').disabled = false;
+        document.getElementById('signupBtn').style.opacity = '1';
+        document.getElementById('signupBtn').style.cursor = 'pointer';
+        document.getElementById('signupEmail').disabled = true;
+        document.getElementById('signupOtp').disabled = true;
+        document.getElementById('verifyBtn').disabled = true;
+        document.getElementById('otpBtn').disabled = true;
+      } else {
+        document.getElementById('otpVerifyStatus').textContent = data.error;
+        document.getElementById('otpVerifyStatus').style.color = '#C62828';
+      }
+    }
+
+    async function handleSignup(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('signupError');
+      errEl.classList.remove('show');
+
+      if (!emailVerified) {
+        errEl.textContent = 'Please verify your email with OTP first';
+        errEl.classList.add('show');
+        return;
+      }
+
+      const res = await fetch('/api/user/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('signupName').value,
+          phone: document.getElementById('signupPhone').value,
+          email: document.getElementById('signupEmail').value,
+          address: document.getElementById('signupAddress').value,
+          password: document.getElementById('signupPass').value
+        })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        currentUser = data.user;
+        showDashboard();
+      } else {
+        errEl.textContent = data.error;
+        errEl.classList.add('show');
+      }
+    }
+
+    async function handleLogout() {
+      await fetch('/api/user/logout', { method: 'POST' });
+      currentUser = null;
+      document.getElementById('authSection').style.display = 'block';
+      document.getElementById('dashSection').classList.remove('active');
+    }
+
+    function showDashboard() {
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('dashSection').classList.add('active');
+      document.getElementById('dashGreeting').textContent = 'Hello, ' + currentUser.name.split(' ')[0] + '!';
+      document.getElementById('dashPhone').innerHTML = '<i class="fas fa-phone"></i> ' + currentUser.phone;
+
+      // Fill profile
+      document.getElementById('profileName').value = currentUser.name || '';
+      document.getElementById('profilePhone').value = currentUser.phone || '';
+      document.getElementById('profileEmail').value = currentUser.email || '';
+      document.getElementById('profileAddress').value = currentUser.address || '';
+
+      loadUserOrders();
+    }
+
+    async function loadUserOrders() {
+      const res = await fetch('/api/user/orders');
+      const orders = await res.json();
+      const container = document.getElementById('userOrdersList');
+
+      if (!orders.length) {
+        container.innerHTML = '<div class="empty-box"><i class="fas fa-box-open"></i><p>No orders yet. Start shopping!</p><a href="/" style="display:inline-block;margin-top:16px;padding:10px 20px;background:var(--primary);color:white;border-radius:8px;text-decoration:none;">Browse Sarees</a></div>';
+        return;
+      }
+
+      container.innerHTML = orders.map(order => `
+        <div class="order-card-mini">
+          <div class="order-mini-header">
+            <span class="track-code">${order.track_id || '#' + order.id}</span>
+            <span class="date">${new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+            <span class="status-pill ${order.status}">${order.status}</span>
+          </div>
+          <div class="order-mini-items">
+            ${order.items.map(i => `<img src="${i.image_url || 'https://via.placeholder.com/44'}" alt="${i.product_name}" title="${i.product_name} x${i.quantity}">`).join('')}
+          </div>
+          <div class="order-mini-footer">
+            <span class="total">₹${Number(order.total_amount).toLocaleString()}</span>
+            <a href="/#track" onclick="localStorage.setItem('track_id','${order.track_id || order.id}')"><i class="fas fa-map-marker-alt"></i> Track</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showDashTab(tab) {
+      document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    async function updateProfile(e) {
+      e.preventDefault();
+      const res = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('profileName').value,
+          email: document.getElementById('profileEmail').value,
+          address: document.getElementById('profileAddress').value
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Profile updated!');
+        currentUser.name = document.getElementById('profileName').value;
+        currentUser.email = document.getElementById('profileEmail').value;
+        currentUser.address = document.getElementById('profileAddress').value;
+        document.getElementById('dashGreeting').textContent = 'Hello, ' + currentUser.name.split(' ')[0] + '!';
+      } else {
+        alert(data.error || 'Failed to update');
+      }
+    }
+  </script>
+</body>
+</html>

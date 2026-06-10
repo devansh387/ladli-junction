@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders - Ladli Junction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/order.css">
+  <style>
+    .my-orders-page {
+      min-height: 100vh;
+      padding: 100px 24px 60px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-light);
+    }
+
+    .phone-lookup {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
+    }
+
+    .phone-lookup label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .phone-lookup .input-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .phone-lookup input {
+      flex: 1;
+      padding: 14px 20px;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .phone-lookup input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .phone-lookup button {
+      padding: 14px 28px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .phone-lookup button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .phone-error {
+      color: #C62828;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .phone-error.show {
+      display: block;
+    }
+
+    /* Orders List */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .order-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .order-card:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    .order-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: #F8F9FA;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .order-card-header .order-id {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--primary);
+    }
+
+    .order-card-header .order-date {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .order-card-header .status-pill {
+      padding: 5px 14px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .status-pill.pending { background: #FFF3E0; color: #E65100; }
+    .status-pill.pending::before { content: "⏳ "; }
+    .status-pill.confirmed { background: #E3F2FD; color: #1565C0; }
+    .status-pill.confirmed::before { content: "✓ "; }
+    .status-pill.shipped { background: #F3E5F5; color: #7B1FA2; }
+    .status-pill.shipped::before { content: "🚚 "; }
+    .status-pill.delivered { background: #E8F5E9; color: #2E7D32; }
+    .status-pill.delivered::before { content: "✅ "; }
+    .status-pill.cancelled { background: #FFEBEE; color: #C62828; }
+    .status-pill.cancelled::before { content: "✗ "; }
+
+    .order-card-body {
+      padding: 20px 24px;
+    }
+
+    .order-items-mini {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .order-item-mini {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .order-item-mini img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .order-item-mini .item-info {
+      flex: 1;
+    }
+
+    .order-item-mini .item-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .order-item-mini .item-qty {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .order-item-mini .item-price {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .order-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-top: 1px solid #f0f0f0;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .order-total {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .order-card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .order-card-actions button {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-edit-order {
+      background: #E3F2FD;
+      color: #1565C0;
+    }
+
+    .btn-edit-order:hover {
+      background: #BBDEFB;
+    }
+
+    .btn-track-link {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-track-link:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Delivery details in order card */
+    .delivery-mini {
+      background: #F8F9FA;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .delivery-mini p {
+      margin-bottom: 4px;
+    }
+
+    .delivery-mini strong {
+      color: #333;
+    }
+
+    /* Empty state */
+    .no-orders {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .no-orders i {
+      font-size: 3rem;
+      color: #ddd;
+      margin-bottom: 16px;
+    }
+
+    .no-orders h3 {
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .no-orders p {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Edit inline */
+    .edit-form-inline {
+      background: #FFF8E1;
+      border: 2px solid #FFD54F;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .edit-form-inline.show {
+      display: block;
+      animation: slideUp 0.3s ease;
+    }
+
+    .edit-form-inline .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .edit-form-inline .form-group {
+      margin-bottom: 0;
+    }
+
+    .edit-form-inline label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .edit-form-inline input,
+    .edit-form-inline textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #E9ECEF;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    .edit-form-inline input:focus,
+    .edit-form-inline textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .edit-form-inline textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    .edit-form-inline .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .edit-form-inline .btn-save-edit {
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .edit-form-inline .btn-cancel-edit {
+      padding: 10px 20px;
+      background: #f5f5f5;
+      color: #666;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    @media (max-width: 576px) {
+      .phone-lookup .input-row {
+        flex-direction: column;
+      }
+      .edit-form-inline .form-row {
+        grid-template-columns: 1fr;
+      }
+      .order-card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar scrolled" id="navbar">
+    <div class="nav-container">
+      <a href="/" class="logo">
+        <img src="/images/logo.png" alt="Ladli Junction" style="height:36px;">
+      </a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#collection">Collection</a></li>
+        <li><a href="/my-orders.html" style="color:var(--primary);font-weight:600;">My Orders</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="/" style="text-decoration:none;color:var(--primary);font-size:0.9rem;font-weight:500;">
+          <i class="fas fa-arrow-left"></i> Back to Shop
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="my-orders-page">
+    <div class="page-header">
+      <h1>📦 My Orders</h1>
+      <p>View all your orders, track status, and edit delivery details</p>
+    </div>
+
+    <!-- Phone Lookup -->
+    <div class="phone-lookup">
+      <label for="myPhone">Enter your phone number to see your orders:</label>
+      <div class="input-row">
+        <input type="tel" id="myPhone" placeholder="e.g., 9876543210" maxlength="13">
+        <button onclick="lookupOrders()"><i class="fas fa-search"></i> Find Orders</button>
+      </div>
+      <p class="phone-error" id="phoneError"></p>
+    </div>
+
+    <!-- Orders Container -->
+    <div id="ordersContainer"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastContainer"></div>
+
+  <script>
+    // Load phone from localStorage if saved
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedPhone = localStorage.getItem('saree_customer_phone');
+      if (savedPhone) {
+        document.getElementById('myPhone').value = savedPhone;
+        lookupOrders();
+      }
+    });
+
+    async function lookupOrders() {
+      const phone = document.getElementById('myPhone').value.replace(/[\s\-\(\)]/g, '');
+      const errorEl = document.getElementById('phoneError');
+
+      // Validate
+      if (!phone) {
+        errorEl.textContent = 'Please enter your phone number';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      const phoneRegex = /^(\+91|91|0)?[6-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        errorEl.textContent = 'Please enter a valid 10-digit Indian phone number (starting with 6-9)';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      errorEl.classList.remove('show');
+
+      // Save phone for convenience
+      localStorage.setItem('saree_customer_phone', phone);
+
+      // Fetch orders
+      const res = await fetch(`/api/orders/my-orders/${encodeURIComponent(phone)}`);
+      const orders = await res.json();
+      const container = document.getElementById('ordersContainer');
+
+      if (!orders.length) {
+        container.innerHTML = `
+          <div class="no-orders">
+            <i class="fas fa-box-open"></i>
+            <h3>No orders found</h3>
+            <p>No orders found for this phone number. Make sure you're using the same number you used while ordering.</p>
+            <a href="/" style="display:inline-block;margin-top:16px;padding:10px 24px;background:var(--primary);color:white;text-decoration:none;border-radius:8px;">Start Shopping</a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <p style="margin-bottom:16px;color:var(--text-light);font-size:0.9rem;">${orders.length} order(s) found</p>
+        <div class="orders-list">
+          ${orders.map(order => renderOrderCard(order)).join('')}
+        </div>
+      `;
+    }
+
+    function renderOrderCard(order) {
+      const statusOrder = ['pending', 'confirmed', 'shipped', 'delivered'];
+      const currentIndex = statusOrder.indexOf(order.status);
+      const canEdit = order.status === 'pending' || order.status === 'confirmed';
+
+      return `
+        <div class="order-card" id="order-card-${order.id}">
+          <div class="order-card-header">
+            <div>
+              <span class="order-id">${escapeHtml(order.track_id || 'Order #' + order.id)}</span>
+              <span class="order-date" style="margin-left:12px;">${new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+            </div>
+            <span class="status-pill ${order.status}">${order.status}</span>
+          </div>
+
+          <div class="order-card-body">
+            <!-- Items -->
+            <div class="order-items-mini">
+              ${order.items && order.items.length > 0 ? order.items.map(item => `
+                <div class="order-item-mini">
+                  <img src="${item.image_url || 'https://via.placeholder.com/48?text=Item'}" alt="${escapeHtml(item.product_name)}">
+                  <div class="item-info">
+                    <div class="item-name">${escapeHtml(item.product_name)}</div>
+                    <div class="item-qty">Qty: ${item.quantity}</div>
+                  </div>
+                  <div class="item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
+                </div>
+              `).join('') : '<p style="color:#999;">Items info not available</p>'}
+            </div>
+
+            <!-- Delivery Info -->
+            <div class="delivery-mini">
+              <p><strong>Deliver to:</strong> ${escapeHtml(order.customer_name)}</p>
+              <p><strong>Address:</strong> ${escapeHtml(order.customer_address)}</p>
+              <p><strong>Phone:</strong> ${order.customer_phone}</p>
+              ${order.customer_email ? `<p><strong>Email:</strong> ${escapeHtml(order.customer_email)}</p>` : ''}
+            </div>
+
+            <!-- Edit Form (hidden by default) -->
+            <div class="edit-form-inline" id="edit-form-${order.id}">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Name</label>
+                  <input type="text" id="edit-name-${order.id}" value="${escapeAttr(order.customer_name)}">
+                </div>
+                <div class="form-group">
+                  <label>Phone</label>
+                  <input type="tel" id="edit-phone-${order.id}" value="${escapeAttr(order.customer_phone)}">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Email</label>
+                  <input type="email" id="edit-email-${order.id}" value="${escapeAttr(order.customer_email || '')}">
+                </div>
+                <div class="form-group">
+                  <label>Address</label>
+                  <textarea id="edit-address-${order.id}">${escapeHtml(order.customer_address)}</textarea>
+                </div>
+              </div>
+              <div class="btn-row">
+                <button class="btn-save-edit" onclick="saveEdit('${escapeAttr(order.track_id || order.id)}', ${order.id})"><i class="fas fa-check"></i> Save Changes</button>
+                <button class="btn-cancel-edit" onclick="toggleEdit(${order.id})">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-card-footer">
+            <span class="order-total">Total: ₹${Number(order.total_amount).toLocaleString()}</span>
+            <div class="order-card-actions">
+              ${canEdit ? `<button class="btn-edit-order" onclick="toggleEdit(${order.id})"><i class="fas fa-pen"></i> Edit</button>` : ''}
+              <button class="btn-track-link" onclick="window.location.href='/#track'; localStorage.setItem('track_id', '${escapeAttr(order.track_id || order.id)}')"><i class="fas fa-map-marker-alt"></i> Track</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleEdit(orderId) {
+      const form = document.getElementById(`edit-form-${orderId}`);
+      form.classList.toggle('show');
+    }
+
+    async function saveEdit(trackId, orderId) {
+      const data = {
+        customer_name: document.getElementById(`edit-name-${orderId}`).value,
+        customer_phone: document.getElementById(`edit-phone-${orderId}`).value,
+        customer_email: document.getElementById(`edit-email-${orderId}`).value,
+        customer_address: document.getElementById(`edit-address-${orderId}`).value
+      };
+
+      const res = await fetch(`/api/orders/update/${encodeURIComponent(trackId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        showToast('Details updated successfully!', 'success');
+        // Refresh the orders list
+        lookupOrders();
+      } else {
+        showToast(result.error || 'Failed to update', 'error');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function showToast(message, type = '') {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      toast.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:14px 24px;border-radius:12px;color:white;font-size:0.9rem;z-index:9999;transform:translateY(0);opacity:1;box-shadow:0 10px 30px rgba(0,0,0,0.2);';
+      toast.style.background = type === 'success' ? '#2E7D32' : type === 'error' ? '#C62828' : '#333';
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
