@@ -51,14 +51,16 @@ app.use(generalLimiter);
 
 app.set('trust proxy', 1);
 
-// ─── Static Files (uploads) ──────────────────────────────────────────────────
-
-app.use('/uploads', express.static(config.uploads.dir, {
-  maxAge: '7d',
-  etag: true,
-}));
-
 // ─── Health Check ────────────────────────────────────────────────────────────
+
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Ladli Junction API',
+    version: '1.0.0',
+    status: 'running',
+    docs: '/api/health',
+  });
+});
 
 app.get('/api/health', async (req, res) => {
   const { healthCheck } = require('./config/database');

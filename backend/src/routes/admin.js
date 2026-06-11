@@ -2,8 +2,8 @@
 
 const { Router } = require('express');
 const multer = require('multer');
+const crypto = require('crypto');
 const path = require('path');
-const fs = require('fs');
 const adminController = require('../controllers/adminController');
 const { authenticate } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/adminAuth');
@@ -11,22 +11,11 @@ const config = require('../config');
 
 const router = Router();
 
-// ── File upload config ───────────────────────────────────────────────────────
-const uploadDir = config.uploads.dir;
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
-    cb(null, uniqueName);
-  },
-});
+// ── File upload config (memory storage — files go to Supabase, not disk) ─────
+const memoryStorage = multer.memoryStorage();
 
 const imageUpload = multer({
-  storage,
+  storage: memoryStorage,
   limits: { fileSize: config.uploads.maxFileSizeMB * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|webp|gif/;
@@ -38,7 +27,7 @@ const imageUpload = multer({
 });
 
 const heroUpload = multer({
-  storage,
+  storage: memoryStorage,
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|webp|gif|mp4|webm|mov/;

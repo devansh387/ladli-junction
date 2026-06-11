@@ -38,6 +38,10 @@ async function getAllProducts() {
 }
 
 async function createProduct(data, imageFiles) {
+  const { uploadFile } = require('../config/storage');
+  const crypto = require('crypto');
+  const path = require('path');
+
   const {
     name, description, price, original_price, category_id, sub_category_id,
     stock, featured, colors, tags, color_variants_meta, categories,
@@ -54,7 +58,11 @@ async function createProduct(data, imageFiles) {
       const variantImages = [...(variant.existingImages || [])];
       for (let i = 0; i < (variant.fileCount || 0); i++) {
         if (imageFiles && imageFiles[fileIndex]) {
-          variantImages.push('/uploads/' + imageFiles[fileIndex].filename);
+          const f = imageFiles[fileIndex];
+          const ext = path.extname(f.originalname).toLowerCase();
+          const uniqueName = Date.now() + '-' + crypto.randomBytes(4).toString('hex') + ext;
+          const url = await uploadFile(f.buffer, uniqueName, f.mimetype);
+          variantImages.push(url);
           fileIndex++;
         }
       }
@@ -65,7 +73,12 @@ async function createProduct(data, imageFiles) {
 
   // Fallback: if no variants but files uploaded
   if (colorVariants.length === 0 && imageFiles && imageFiles.length > 0) {
-    allImages = imageFiles.map((f) => '/uploads/' + f.filename);
+    for (const f of imageFiles) {
+      const ext = path.extname(f.originalname).toLowerCase();
+      const uniqueName = Date.now() + '-' + crypto.randomBytes(4).toString('hex') + ext;
+      const url = await uploadFile(f.buffer, uniqueName, f.mimetype);
+      allImages.push(url);
+    }
   }
 
   const imageUrl = allImages[0] || null;
@@ -88,6 +101,10 @@ async function createProduct(data, imageFiles) {
 }
 
 async function updateProduct(id, data, imageFiles) {
+  const { uploadFile } = require('../config/storage');
+  const crypto = require('crypto');
+  const path = require('path');
+
   const existing = await query('SELECT * FROM products WHERE id = $1', [id]);
   if (existing.rows.length === 0) {
     throw new AppError('Product not found.', 404);
@@ -109,7 +126,11 @@ async function updateProduct(id, data, imageFiles) {
       const variantImages = [...(variant.existingImages || [])];
       for (let i = 0; i < (variant.fileCount || 0); i++) {
         if (imageFiles && imageFiles[fileIndex]) {
-          variantImages.push('/uploads/' + imageFiles[fileIndex].filename);
+          const f = imageFiles[fileIndex];
+          const ext = path.extname(f.originalname).toLowerCase();
+          const uniqueName = Date.now() + '-' + crypto.randomBytes(4).toString('hex') + ext;
+          const url = await uploadFile(f.buffer, uniqueName, f.mimetype);
+          variantImages.push(url);
           fileIndex++;
         }
       }
@@ -119,7 +140,12 @@ async function updateProduct(id, data, imageFiles) {
   }
 
   if (colorVariants.length === 0 && imageFiles && imageFiles.length > 0) {
-    allImages = imageFiles.map((f) => '/uploads/' + f.filename);
+    for (const f of imageFiles) {
+      const ext = path.extname(f.originalname).toLowerCase();
+      const uniqueName = Date.now() + '-' + crypto.randomBytes(4).toString('hex') + ext;
+      const url = await uploadFile(f.buffer, uniqueName, f.mimetype);
+      allImages.push(url);
+    }
   }
 
   const imageUrl = allImages[0] || product.image_url;

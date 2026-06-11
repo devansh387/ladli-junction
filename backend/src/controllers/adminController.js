@@ -145,11 +145,20 @@ async function uploadHeroMedia(req, res, next) {
       return res.status(400).json({ success: false, error: 'No files uploaded.' });
     }
 
+    const { uploadFile } = require('../config/storage');
     const path = require('path');
-    const files = req.files.map((f) => ({
-      url: '/uploads/' + f.filename,
-      type: ['.mp4', '.webm', '.mov'].includes(path.extname(f.originalname).toLowerCase()) ? 'video' : 'image',
-    }));
+    const crypto = require('crypto');
+
+    const files = [];
+    for (const f of req.files) {
+      const ext = path.extname(f.originalname).toLowerCase();
+      const uniqueName = Date.now() + '-' + crypto.randomBytes(4).toString('hex') + ext;
+      const url = await uploadFile(f.buffer, uniqueName, f.mimetype);
+      files.push({
+        url,
+        type: ['.mp4', '.webm', '.mov'].includes(ext) ? 'video' : 'image',
+      });
+    }
 
     const result = await adminService.updateHeroConfig(files);
     res.json(result);

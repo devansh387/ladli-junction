@@ -59,6 +59,12 @@ const config = Object.freeze({
     maxFileSizeMB: parseInt(process.env.MAX_FILE_SIZE_MB, 10) || 20,
   },
 
+  // Supabase Storage
+  supabase: {
+    url: process.env.SUPABASE_URL || '',
+    serviceKey: process.env.SUPABASE_SERVICE_KEY || '',
+  },
+
   // Security
   security: {
     maxLoginAttempts: 5,

@@ -6,7 +6,7 @@ services:
   - type: web
     name: ladli-junction-api
     runtime: node
-    region: singapore  # Closest to India
+    region: singapore
     plan: free
     buildCommand: npm install && npm run setup
     startCommand: npm start
@@ -17,7 +17,7 @@ services:
       - key: PORT
         value: "10000"
       - key: DATABASE_URL
-        sync: false  # Set manually in Render dashboard
+        sync: false
       - key: JWT_ACCESS_SECRET
         sync: false
       - key: JWT_REFRESH_SECRET
@@ -27,7 +27,7 @@ services:
       - key: REFRESH_TOKEN_EXPIRY_DAYS
         value: "7"
       - key: FRONTEND_URL
-        sync: false  # Set to your Vercel URL
+        sync: false
       - key: BREVO_API_KEY
         sync: false
       - key: MAIL_FROM
@@ -44,7 +44,7 @@ services:
         sync: false
       - key: MAX_FILE_SIZE_MB
         value: "20"
-    disk:
-      name: uploads
-      mountPath: /opt/render/project/src/uploads
-      sizeGB: 1
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false

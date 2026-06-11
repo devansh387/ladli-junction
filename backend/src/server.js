@@ -20,6 +20,12 @@ async function start() {
   }
   console.log('✅ Database connected successfully.');
 
+  // Ensure Supabase storage bucket exists
+  if (config.supabase.url && config.supabase.serviceKey) {
+    const { ensureBucket } = require('./config/storage');
+    await ensureBucket();
+  }
+
   // Start server
   app.listen(config.port, () => {
     console.log(`\n🚀 Ladli Junction API Server`);
