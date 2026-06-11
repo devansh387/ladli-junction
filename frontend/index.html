@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ladli Junction - Premium Saree Collection</title>
+  <meta name="description" content="Discover our exquisite collection of handcrafted sarees. Premium silk, cotton, designer and wedding sarees.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/order.css">
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loader" class="loader">
+    <div class="loader-content">
+      <div class="loader-saree"></div>
+      <p>Loading Elegance...</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">
+        <img src="/images/logo.png" alt="Ladli Junction" style="height:50px;">
+        <span class="logo-text">Ladli Junction</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#collection">Collection</a></li>
+        <li><a href="#track">Track Order</a></li>
+        <li><a href="/account.html">My Account</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="cart-btn" onclick="Shop.openCart()">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <button class="mobile-menu-btn" onclick="Shop.toggleMobileMenu()">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="line-1">Timeless</span>
+        <span class="line-2">Elegance</span>
+        <span class="line-3">in Every Drape</span>
+      </h1>
+      <p class="hero-subtitle">Discover our exquisite collection of handcrafted sarees that blend tradition with contemporary style</p>
+      <a href="#collection" class="hero-btn"><span>Explore Collection</span><i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="hero-3d-element" id="heroMediaContainer"></div>
+  </section>
+
+  <!-- Featured Section -->
+  <section class="featured-section" id="featured">
+    <div class="container">
+      <div class="section-header" style="text-align:left;">
+        <span class="section-tag">Best Sells</span>
+        <h2 class="section-title">Most Popular</h2>
+      </div>
+      <div class="products-scroll" id="featuredGrid"></div>
+    </div>
+  </section>
+
+  <!-- Full Collection -->
+  <section class="collection-section" id="collection">
+    <div class="container">
+      <div class="section-header" style="text-align:left;">
+        <h2 class="section-title">Our Collection</h2>
+      </div>
+      <div class="category-tabs" id="categoryTabs">
+        <button class="cat-tab active" onclick="Shop.filterByTab('')">All</button>
+      </div>
+      <div class="fabric-filters" id="fabricFilters">
+        <button class="fabric-pill active" onclick="Shop.filterByFabric('')">All Fabrics</button>
+      </div>
+      <div class="filter-bar">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Search..." oninput="Shop.filterProducts()">
+        </div>
+      </div>
+      <div class="products-grid" id="productsGrid"></div>
+    </div>
+  </section>
+
+  <!-- Track Order Section -->
+  <section class="track-section" id="track">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Track Your Order</h2>
+        <p class="section-desc">Enter your unique Tracking ID to see real-time status</p>
+      </div>
+      <div class="track-card">
+        <div class="input-group">
+          <input type="text" id="trackOrderId" placeholder="Enter Tracking ID (e.g., SE-7A3K9X)" style="text-transform:uppercase;letter-spacing:1px;">
+          <button onclick="Shop.trackOrder()"><i class="fas fa-search"></i> Track</button>
+        </div>
+        <div id="trackResult" class="track-result"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Order Success Overlay -->
+  <div class="order-success-overlay" id="orderSuccessOverlay">
+    <div class="order-success-card" id="orderSuccessCard"></div>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay" id="cartOverlay" onclick="Shop.closeCart()"></div>
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3><i class="fas fa-shopping-bag"></i> Your Cart</h3>
+      <button onclick="Shop.closeCart()" class="close-btn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total"><span>Total:</span><span id="cartTotal">₹0</span></div>
+      <button class="checkout-btn" onclick="Shop.openCheckout()">Proceed to Order</button>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Place Your Order</h3>
+        <button onclick="Shop.closeCheckout()" class="close-btn"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="checkoutForm" onsubmit="Shop.placeOrder(event)">
+        <div class="form-group"><label>Full Name *</label><input type="text" id="custName" required placeholder="Your full name"></div>
+        <div class="form-group"><label>Phone Number *</label><input type="tel" id="custPhone" required placeholder="10-digit number" maxlength="13" oninput="Shop.validatePhone(this)"><small id="phoneHelp" style="color:#666;font-size:0.75rem;">Enter 10-digit Indian mobile number</small></div>
+        <div class="form-group"><label>Email</label><input type="email" id="custEmail" placeholder="your@email.com (optional)"></div>
+        <div class="form-group"><label>Delivery Address *</label><textarea id="custAddress" required placeholder="Full delivery address"></textarea></div>
+        <div class="form-group"><label>Notes</label><textarea id="custNotes" placeholder="Any special instructions (optional)"></textarea></div>
+        <button type="submit" class="submit-btn"><i class="fas fa-check"></i> Confirm Order</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal product-detail-modal">
+      <button onclick="Shop.closeProductModal()" class="close-btn modal-close"><i class="fas fa-times"></i></button>
+      <div id="productDetail"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand"><h3>Ladli Junction</h3><p>Bringing timeless elegance to your wardrobe since generations.</p></div>
+        <div class="footer-links"><h4>Quick Links</h4><a href="#home">Home</a><a href="#collection">Collection</a><a href="#track">Track Order</a></div>
+        <div class="footer-contact"><h4>Contact Us</h4><p><i class="fas fa-phone"></i> +91 9429670205 / 7990309748</p><p><i class="fas fa-envelope"></i> ladlijunction33@gmail.com</p><p><i class="fas fa-map-marker-alt"></i> Ladli Junction, Nr. Verai Mata Temple, Anand 388001</p></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2024 Ladli Junction. All rights reserved.</p></div>
+    </div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/shop.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Shop.init();
+    });
+  </script>
+</body>
+</html>

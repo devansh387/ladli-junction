@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders - Ladli Junction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/order.css">
+  <style>
+    .my-orders-page{min-height:100vh;padding:100px 24px 60px;max-width:800px;margin:0 auto}
+    .page-header{text-align:center;margin-bottom:40px}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--text);margin-bottom:8px}
+    .page-header p{color:var(--text-light)}
+    .phone-lookup{background:white;border-radius:16px;padding:32px;box-shadow:var(--shadow);margin-bottom:32px}
+    .phone-lookup label{display:block;font-size:0.85rem;font-weight:600;margin-bottom:8px;color:var(--text)}
+    .phone-lookup .input-row{display:flex;gap:12px}
+    .phone-lookup input{flex:1;padding:14px 20px;border:2px solid #eee;border-radius:12px;font-size:1rem;font-family:inherit;transition:border-color 0.3s}
+    .phone-lookup input:focus{outline:none;border-color:var(--primary)}
+    .phone-lookup button{padding:14px 28px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:500;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;gap:8px;white-space:nowrap}
+    .phone-lookup button:hover{background:var(--primary-dark);transform:translateY(-2px)}
+    .orders-list{display:flex;flex-direction:column;gap:24px}
+    .order-card{background:white;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;transition:all 0.3s}
+    .order-card:hover{box-shadow:0 8px 30px rgba(0,0,0,0.12)}
+    .order-card-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;background:#F8F9FA;border-bottom:1px solid #eee;flex-wrap:wrap;gap:12px}
+    .order-card-header .order-id{font-weight:700;font-size:1rem;color:var(--primary)}
+    .order-card-header .order-date{font-size:0.8rem;color:#666}
+    .status-pill{padding:5px 14px;border-radius:50px;font-size:0.75rem;font-weight:600;text-transform:capitalize}
+    .status-pill.pending{background:#FFF3E0;color:#E65100}.status-pill.confirmed{background:#E3F2FD;color:#1565C0}
+    .status-pill.shipped{background:#F3E5F5;color:#7B1FA2}.status-pill.delivered{background:#E8F5E9;color:#2E7D32}
+    .status-pill.cancelled{background:#FFEBEE;color:#C62828}
+    .order-card-body{padding:20px 24px}
+    .order-card-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-top:1px solid #f0f0f0;flex-wrap:wrap;gap:12px}
+    .order-total{font-size:1.1rem;font-weight:700;color:var(--text)}
+    .no-orders{text-align:center;padding:60px 20px;background:white;border-radius:16px;box-shadow:var(--shadow)}
+    .no-orders i{font-size:3rem;color:#ddd;margin-bottom:16px}
+  </style>
+</head>
+<body>
+  <nav class="navbar scrolled" id="navbar">
+    <div class="nav-container">
+      <a href="/" class="logo"><img src="/images/logo.png" alt="Ladli Junction" style="height:36px;"></a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#collection">Collection</a></li>
+        <li><a href="/my-orders.html" style="color:var(--primary);font-weight:600;">My Orders</a></li>
+      </ul>
+      <div class="nav-actions"><a href="/" style="text-decoration:none;color:var(--primary);font-size:0.9rem;font-weight:500;"><i class="fas fa-arrow-left"></i> Back to Shop</a></div>
+    </div>
+  </nav>
+
+  <div class="my-orders-page">
+    <div class="page-header"><h1>📦 My Orders</h1><p>View all your orders and track status</p></div>
+    <div class="phone-lookup">
+      <label for="myPhone">Enter your phone number to see your orders:</label>
+      <div class="input-row">
+        <input type="tel" id="myPhone" placeholder="e.g., 9876543210" maxlength="13">
+        <button onclick="lookupOrders()"><i class="fas fa-search"></i> Find Orders</button>
+      </div>
+    </div>
+    <div id="ordersContainer"></div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedPhone = Utils.getStoredPhone();
+      if (savedPhone) { document.getElementById('myPhone').value = savedPhone; lookupOrders(); }
+    });
+
+    async function lookupOrders() {
+      const phone = Utils.cleanPhone(document.getElementById('myPhone').value);
+      if (!phone) { Utils.showToast('Please enter your phone number', 'error'); return; }
+      if (!Utils.isValidPhone(phone)) { Utils.showToast('Enter a valid 10-digit Indian phone number', 'error'); return; }
+
+      Utils.setStoredPhone(phone);
+
+      const { ok, data } = await Api.get(`/orders/my-orders/${encodeURIComponent(phone)}`);
+      const container = document.getElementById('ordersContainer');
+
+      if (!ok || !data || data.length === 0) {
+        container.innerHTML = '<div class="no-orders"><i class="fas fa-box-open"></i><h3>No orders found</h3><p>No orders found for this phone number.</p><a href="/" style="display:inline-block;margin-top:16px;padding:10px 24px;background:var(--primary);color:white;text-decoration:none;border-radius:8px;">Start Shopping</a></div>';
+        return;
+      }
+
+      container.innerHTML = `<p style="margin-bottom:16px;color:var(--text-light);font-size:0.9rem;">${data.length} order(s) found</p><div class="orders-list">${data.map(renderOrderCard).join('')}</div>`;
+    }
+
+    function renderOrderCard(order) {
+      return `
+        <div class="order-card">
+          <div class="order-card-header">
+            <div><span class="order-id">${Utils.escapeHtml(order.track_id || 'Order #' + order.id)}</span><span class="order-date" style="margin-left:12px;">${Utils.formatDate(order.created_at)}</span></div>
+            <span class="status-pill ${order.status}">${order.status}</span>
+          </div>
+          <div class="order-card-body">
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+              ${order.items && order.items.length > 0 ? order.items.map((item) => `
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <img src="${item.image_url ? CONFIG.API_BASE + item.image_url : 'https://via.placeholder.com/48?text=Item'}" alt="${Utils.escapeAttr(item.product_name)}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;" onerror="this.src='https://via.placeholder.com/48?text=Item'">
+                  <div style="flex:1;"><div style="font-size:0.9rem;font-weight:500;">${Utils.escapeHtml(item.product_name)}</div><div style="font-size:0.8rem;color:#666;">Qty: ${item.quantity}</div></div>
+                  <div style="font-weight:600;color:var(--primary);">${Utils.formatCurrency(item.price * item.quantity)}</div>
+                </div>`).join('') : '<p style="color:#999;">Items info not available</p>'}
+            </div>
+          </div>
+          <div class="order-card-footer">
+            <span class="order-total">Total: ${Utils.formatCurrency(order.total_amount)}</span>
+            <button onclick="window.location.href='/#track'; localStorage.setItem('track_id', '${Utils.escapeAttr(order.track_id || order.id)}')" style="padding:8px 16px;background:var(--primary);color:white;border:none;border-radius:8px;font-size:0.8rem;cursor:pointer;"><i class="fas fa-map-marker-alt"></i> Track</button>
+          </div>
+        </div>`;
+    }
+  </script>
+</body>
+</html>

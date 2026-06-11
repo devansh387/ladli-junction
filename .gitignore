@@ -1,3 +1,36 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Root .gitignore — Ladli Junction Monorepo
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Dependencies
 node_modules/
-uploads/
+
+# Environment files (contain secrets)
+.env
+backend/.env
+
+# Old project files (deprecated — now using backend/ and frontend/)
 database/shop.db
+uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vercel
+.vercel/
+
+# Build artifacts
+dist/
+build/

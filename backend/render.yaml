@@ -1,0 +1,50 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Render Deployment Configuration — Ladli Junction Backend
+# ══════════════════════════════════════════════════════════════════════════════
+
+services:
+  - type: web
+    name: ladli-junction-api
+    runtime: node
+    region: singapore  # Closest to India
+    plan: free
+    buildCommand: npm install && npm run setup
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        sync: false  # Set manually in Render dashboard
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: ACCESS_TOKEN_EXPIRY
+        value: "15m"
+      - key: REFRESH_TOKEN_EXPIRY_DAYS
+        value: "7"
+      - key: FRONTEND_URL
+        sync: false  # Set to your Vercel URL
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        value: ladlijunction33@gmail.com
+      - key: MAIL_FROM_NAME
+        value: Ladli Junction
+      - key: ORDER_NOTIFICATION_EMAIL
+        value: ladlijunction33@gmail.com
+      - key: ADMIN_EMAIL
+        value: ladlijunction33@gmail.com
+      - key: ADMIN_PHONE
+        value: "9429670205"
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: MAX_FILE_SIZE_MB
+        value: "20"
+    disk:
+      name: uploads
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 1
