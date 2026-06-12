@@ -36,7 +36,7 @@ const config = Object.freeze({
   },
 
   // CORS
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, ''),
 
   // Brevo Email
   brevo: {
